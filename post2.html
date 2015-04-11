@@ -1,0 +1,246 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="description" content="">
+    <meta name="author" content="">
+
+    <title>Jaken Herman - Blog</title>
+
+    <!-- Bootstrap Core CSS -->
+    <link href="css/bootstrap.min.css" rel="stylesheet">
+
+    <!-- Custom CSS -->
+    <link href="css/clean-blog.min.css" rel="stylesheet">
+
+    <!-- Custom Fonts -->
+    <link href="http://maxcdn.bootstrapcdn.com/font-awesome/4.1.0/css/font-awesome.min.css" rel="stylesheet" type="text/css">
+    <link href='http://fonts.googleapis.com/css?family=Lora:400,700,400italic,700italic' rel='stylesheet' type='text/css'>
+    <link href='http://fonts.googleapis.com/css?family=Open+Sans:300italic,400italic,600italic,700italic,800italic,400,300,600,700,800' rel='stylesheet' type='text/css'>
+
+    <!-- HTML5 Shim and Respond.js IE8 support of HTML5 elements and media queries -->
+    <!-- WARNING: Respond.js doesn't work if you view the page via file:// -->
+    <!--[if lt IE 9]>
+        <script src="https://oss.maxcdn.com/libs/html5shiv/3.7.0/html5shiv.js"></script>
+        <script src="https://oss.maxcdn.com/libs/respond.js/1.4.2/respond.min.js"></script>
+    <![endif]-->
+
+</head>
+
+<body>
+
+    <!-- Navigation -->
+    <nav class="navbar navbar-default navbar-custom navbar-fixed-top">
+        <div class="container-fluid">
+            <!-- Brand and toggle get grouped for better mobile display -->
+            <div class="navbar-header page-scroll">
+                <button type="button" class="navbar-toggle" data-toggle="collapse" data-target="#bs-example-navbar-collapse-1">
+                    <span class="sr-only">Toggle navigation</span>
+                    <span class="icon-bar"></span>
+                    <span class="icon-bar"></span>
+                    <span class="icon-bar"></span>
+                </button>
+                <a class="navbar-brand" href="index.html">Jaken Herman</a>
+            </div>
+
+            <!-- Collect the nav links, forms, and other content for toggling -->
+            <div class="collapse navbar-collapse" id="bs-example-navbar-collapse-1">
+                <ul class="nav navbar-nav navbar-right">
+                    <li>
+                        <a href="index.html">Home</a>
+                    </li>
+                    <li>
+                        <a href="http://jaken.me">About</a>
+                    </li>
+                    <li>
+                        <a href="mailto:JakenHerman7@Gmail.com">Contact</a>
+                    </li>
+                </ul>
+            </div>
+            <!-- /.navbar-collapse -->
+        </div>
+        <!-- /.container -->
+    </nav>
+
+    <!-- Page Header -->
+    <!-- Set your background image for this header on the line below. -->
+    <header class="intro-header" style="background-image: url('img/post-bg.jpg')">
+        <div class="container">
+            <div class="row">
+                <div class="col-lg-8 col-lg-offset-2 col-md-10 col-md-offset-1">
+                    <div class="post-heading">
+                        <h1>Convert Base 10 numbers to Binary and Hexadecimal</h1>
+                        <h2 class="subheading">Using NASM (Assembly)</h2>
+                        <span class="meta">Posted by <a href="http://www.twitter.com/imjaken">Jaken Herman</a> on April 10, 2015</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <!-- Post Content -->
+    <article>
+        <div class="container">
+            <div class="row">
+                <div class="col-lg-8 col-lg-offset-2 col-md-10 col-md-offset-1">
+                  <p>
+                    What we'll be doing is prompting the user for Base 10 input (a decimal number), holding the input value in our bx register, then we will convert that value to binary and hexadecimal.
+
+                    First things first, lets get our data section out of the way since that isn't very technical. Your data section should contain your prompt as well as your "In binary, the number you entered is: " strings.
+                    <!-- HTML generated using hilite.me --><div style="background: #f0f0f0; overflow:auto;width:auto;border:solid gray;border-width:.1em .1em .1em .8em;padding:.2em .6em;"><pre style="margin: 0; line-height: 125%"><span style="color: #007020; font-weight: bold">org</span>     <span style="color: #40a070">100h</span>
+
+<span style="color: #007020; font-weight: bold">section</span> <span style="color: #bb60d5">.data</span>
+   <span style="color: #002070; font-weight: bold">prompt1:</span> <span style="color: #007020; font-weight: bold">db</span>  <span style="color: #4070a0">&quot;Please enter a decimal number: $&quot;</span>
+   <span style="color: #002070; font-weight: bold">prompt2:</span> <span style="color: #007020; font-weight: bold">db</span>  <span style="color: #40a070">0Dh</span>,<span style="color: #40a070">0Ah</span>, <span style="color: #4070a0">&quot;In binary, the number you entered is:    $&quot;</span>
+   <span style="color: #002070; font-weight: bold">prompt4:</span> <span style="color: #007020; font-weight: bold">db</span>  <span style="color: #40a070">0Dh</span>,<span style="color: #40a070">0Ah</span>, <span style="color: #4070a0">&quot;In octal, the number you entered is:    $&quot;</span>
+   <span style="color: #002070; font-weight: bold">prompt3:</span> <span style="color: #007020; font-weight: bold">db</span>  <span style="color: #40a070">0Dh</span>,<span style="color: #40a070">0Ah</span>, <span style="color: #4070a0">&quot;In hexadecimal, the number you entered is:    $&quot;</span>
+</pre></div>
+
+Now we need to do some actual work. We'll start by printing the prompt for the user to input their number. We will use int 21h function 9 in order to display the prompt:
+<!-- HTML generated using hilite.me --><div style="background: #f0f0f0; overflow:auto;width:auto;border:solid gray;border-width:.1em .1em .1em .8em;padding:.2em .6em;"><pre style="margin: 0; line-height: 125%"><span style="color: #007020; font-weight: bold">section</span> <span style="color: #bb60d5">.text</span>
+<span style="color: #002070; font-weight: bold">start:</span>
+        <span style="color: #06287e">mov</span>         <span style="color: #007020">ah</span>,<span style="color: #40a070">9</span>                    <span style="color: #60a0b0; font-style: italic">; print prompt</span>
+        <span style="color: #06287e">mov</span>         <span style="color: #007020">dx</span>,<span style="color: #bb60d5">prompt1</span>
+        <span style="color: #06287e">int</span>         <span style="color: #40a070">21h</span>
+</pre></div>
+Now we need to get the user input. We're going to use a loop and read character by character until the character that the user has selected is the carriage return (Enter). which is ASCII code 13. You can find ASCII code values <a href="http://www.asciitable.com/">here</a>. In order to read the character that the user is selecting, we'll use int 21h function 1 - the input character function. This next code section I'm going to type is fairly long, but I've commented every line so you can follow along easily. Comments in x86 assembly language start with ";"
+<!-- HTML generated using hilite.me --><div style="background: #f0f0f0; overflow:auto;width:auto;border:solid gray;border-width:.1em .1em .1em .8em;padding:.2em .6em;"><pre style="margin: 0; line-height: 125%"><span style="color: #60a0b0; font-style: italic">; input base 10 value</span>
+        <span style="color: #06287e">mov</span>         <span style="color: #007020">bx</span>,<span style="color: #40a070">0</span>              <span style="color: #60a0b0; font-style: italic">; bx holds input value</span>
+        <span style="color: #06287e">mov</span>         <span style="color: #007020">ah</span>,<span style="color: #40a070">1</span>              <span style="color: #60a0b0; font-style: italic">; input char function</span>
+        <span style="color: #06287e">int</span>         <span style="color: #40a070">21h</span>               <span style="color: #60a0b0; font-style: italic">; read char into al</span>
+<span style="color: #002070; font-weight: bold">top1:</span>                                 <span style="color: #60a0b0; font-style: italic">; while (char != Carriage Return)</span>
+        <span style="color: #06287e">cmp</span>         <span style="color: #007020">al</span>,<span style="color: #40a070">13</span>             <span style="color: #60a0b0; font-style: italic">; is char = Carriage Return?</span>
+        <span style="color: #06287e">je</span>          <span style="color: #bb60d5">out1</span>              <span style="color: #60a0b0; font-style: italic">; if so, we&#39;re done</span>
+        <span style="color: #06287e">and</span>         <span style="color: #007020">ax</span>,<span style="color: #40a070">000Fh</span>          <span style="color: #60a0b0; font-style: italic">; convert from ASCII to base 10 value</span>
+        <span style="color: #06287e">push</span>        <span style="color: #007020">ax</span>                <span style="color: #60a0b0; font-style: italic">; and save it on stack</span>
+        <span style="color: #06287e">mov</span>         <span style="color: #007020">ax</span>,<span style="color: #40a070">10</span>             <span style="color: #60a0b0; font-style: italic">; set up to multiply bx by 10</span>
+        <span style="color: #06287e">mul</span>         <span style="color: #007020">bx</span>                <span style="color: #60a0b0; font-style: italic">; dx:ax = bx*10</span>
+        <span style="color: #06287e">pop</span>         <span style="color: #007020">bx</span>                <span style="color: #60a0b0; font-style: italic">; saved value in bx</span>
+        <span style="color: #06287e">add</span>         <span style="color: #007020">bx</span>,<span style="color: #007020">ax</span>             <span style="color: #60a0b0; font-style: italic">; bx = old bx*10 + new digit</span>
+
+        <span style="color: #06287e">mov</span>         <span style="color: #007020">ah</span>,<span style="color: #40a070">1</span>              <span style="color: #60a0b0; font-style: italic">; input char function</span>
+        <span style="color: #06287e">int</span>         <span style="color: #40a070">21h</span>               <span style="color: #60a0b0; font-style: italic">; read next character</span>
+        <span style="color: #06287e">jmp</span>         <span style="color: #bb60d5">top1</span>              <span style="color: #60a0b0; font-style: italic">; loop until done</span>
+
+<span style="color: #60a0b0; font-style: italic">; now, output it in binary</span>
+<span style="color: #002070; font-weight: bold">out1:</span>
+        <span style="color: #06287e">mov</span>         <span style="color: #007020">ah</span>,<span style="color: #40a070">9</span>              <span style="color: #60a0b0; font-style: italic">; print binary out text</span>
+        <span style="color: #06287e">mov</span>         <span style="color: #007020">dx</span>,<span style="color: #bb60d5">prompt2</span>
+        <span style="color: #06287e">int</span>         <span style="color: #40a070">21h</span>
+</pre></div>
+
+Now that we have the number the user has selected, we need to convert it to binary. This is done by using a "for" loop and bit rotation. We will initialize our count register, cx, to 16 in order to loop through our "top2" loop 16 times. We will be using int 21h function 2 in order to print single characters. Again, I have commented line by line so you can understand what I am doing:
+
+<!-- HTML generated using hilite.me --><div style="background: #f0f0f0; overflow:auto;width:auto;border:solid gray;border-width:.1em .1em .1em .8em;padding:.2em .6em;"><pre style="margin: 0; line-height: 125%"><span style="color: #60a0b0; font-style: italic">; for for i = 0, i &lt; 16, i++:</span>
+        <span style="color: #06287e">mov</span>         <span style="color: #007020">cx</span>, <span style="color: #40a070">16</span>            <span style="color: #60a0b0; font-style: italic">; loop counter</span>
+
+<span style="color: #002070; font-weight: bold">top2:</span>
+        <span style="color: #06287e">rol</span>         <span style="color: #007020">bx</span>,<span style="color: #40a070">1</span>              <span style="color: #60a0b0; font-style: italic">; rotate most significant bit into carry flag</span>
+        <span style="color: #06287e">jc</span>          <span style="color: #bb60d5">one</span>               <span style="color: #60a0b0; font-style: italic">; carry flag = 1?</span>
+        <span style="color: #06287e">mov</span>         <span style="color: #007020">dl</span>,<span style="color: #4070a0">&#39;0&#39;</span>            <span style="color: #60a0b0; font-style: italic">;  if no, prepare to print 0</span>
+        <span style="color: #06287e">jmp</span>         <span style="color: #bb60d5">print</span>             <span style="color: #60a0b0; font-style: italic">; now print</span>
+<span style="color: #002070; font-weight: bold">one:</span>
+        <span style="color: #06287e">mov</span>         <span style="color: #007020">dl</span>,<span style="color: #4070a0">&#39;1&#39;</span>            <span style="color: #60a0b0; font-style: italic">; printing a 1</span>
+<span style="color: #002070; font-weight: bold">print:</span>
+        <span style="color: #06287e">mov</span>         <span style="color: #007020">ah</span>,<span style="color: #40a070">2</span>              <span style="color: #60a0b0; font-style: italic">; print char function</span>
+        <span style="color: #06287e">int</span>         <span style="color: #40a070">21h</span>               <span style="color: #60a0b0; font-style: italic">; print it</span>
+        <span style="color: #06287e">loop</span>        <span style="color: #bb60d5">top2</span>              <span style="color: #60a0b0; font-style: italic">; loop until done</span>
+</pre></div>
+
+It's that easy to convert base 10 to binary, but let's kick it up a notch. You might think Hexadecimal numbers may be trickier due to the fact that it is <strong>not</strong> just ones and zeroes. Now we're using numbers 0-9 as well as letters A-F in order to construct numbers. Sounds hairy, but it actually isn't all that bad. Again, we'll be using int 21h function 2 in order to print single characters, but this time instead of putting 16 in our count register, we're only putting 4! It's also helpful to know what a <a href="https://en.wikipedia.org/wiki/Nibble">nybble</a> is in this situation. I've added a link to the word so you can read up on them. Again, commented line by line for easy reading (we're almost done!!):
+
+<!-- HTML generated using hilite.me --><div style="background: #f0f0f0; overflow:auto;width:auto;border:solid gray;border-width:.1em .1em .1em .8em;padding:.2em .6em;"><pre style="margin: 0; line-height: 125%"><span style="color: #60a0b0; font-style: italic">; for 4 times do this:</span>
+        <span style="color: #06287e">mov</span>         <span style="color: #007020">cx</span>, <span style="color: #40a070">4</span>             <span style="color: #60a0b0; font-style: italic">; loop counter</span>
+
+<span style="color: #002070; font-weight: bold">top4:</span>
+        <span style="color: #06287e">rol</span>         <span style="color: #007020">bx</span>,<span style="color: #40a070">4</span>              <span style="color: #60a0b0; font-style: italic">; rotate top nybble into the bottom</span>
+        <span style="color: #06287e">mov</span>         <span style="color: #007020">dl</span>,<span style="color: #007020">bl</span>             <span style="color: #60a0b0; font-style: italic">; put a copy in dl</span>
+        <span style="color: #06287e">and</span>         <span style="color: #007020">dl</span>,<span style="color: #40a070">0Fh</span>            <span style="color: #60a0b0; font-style: italic">; we only want the lower 4 bits</span>
+        <span style="color: #06287e">cmp</span>         <span style="color: #007020">dl</span>,<span style="color: #40a070">9</span>              <span style="color: #60a0b0; font-style: italic">; is it in [0-9]?</span>
+        <span style="color: #06287e">ja</span>          <span style="color: #bb60d5">AF</span>                <span style="color: #60a0b0; font-style: italic">; if not, process [A-F]</span>
+        <span style="color: #06287e">or</span>          <span style="color: #007020">dl</span>,<span style="color: #40a070">30h</span>            <span style="color: #60a0b0; font-style: italic">; convert 0-9 to &#39;0&#39;-&#39;9&#39;</span>
+        <span style="color: #06287e">jmp</span>         <span style="color: #bb60d5">print2</span>            <span style="color: #60a0b0; font-style: italic">; now print</span>
+
+<span style="color: #002070; font-weight: bold">AF:</span>
+        <span style="color: #06287e">add</span>         <span style="color: #007020">dl</span>,<span style="color: #40a070">55</span>             <span style="color: #60a0b0; font-style: italic">; convert 10-15 to &#39;A&#39;-&#39;F&#39;</span>
+
+<span style="color: #002070; font-weight: bold">print2:</span>
+        <span style="color: #06287e">mov</span>         <span style="color: #007020">ah</span>,<span style="color: #40a070">2</span>              <span style="color: #60a0b0; font-style: italic">; print char</span>
+        <span style="color: #06287e">int</span>         <span style="color: #40a070">21h</span>
+        <span style="color: #06287e">loop</span>        <span style="color: #bb60d5">top4</span>             <span style="color: #60a0b0; font-style: italic">; loop until done</span>
+</pre></div>
+
+And that's that. We've just converted Base-10 numbers to binary and hexadecimal. Now we just need to exit the program. This is pretty simple using int 21h function 04Ch -DOS function:
+
+<!-- HTML generated using hilite.me --><div style="background: #f0f0f0; overflow:auto;width:auto;border:solid gray;border-width:.1em .1em .1em .8em;padding:.2em .6em;"><pre style="margin: 0; line-height: 125%"><span style="color: #002070; font-weight: bold">Exit:</span>
+        <span style="color: #06287e">mov</span>         <span style="color: #007020">ah</span>,<span style="color: #40a070">04Ch</span>          <span style="color: #60a0b0; font-style: italic">;DOS function: Exit program</span>
+        <span style="color: #06287e">mov</span>         <span style="color: #007020">al</span>,<span style="color: #40a070">0</span>             <span style="color: #60a0b0; font-style: italic">;Return exit code value</span>
+        <span style="color: #06287e">int</span>         <span style="color: #40a070">21h</span>              <span style="color: #60a0b0; font-style: italic">;Call DOS.  Terminate program</span>
+</pre></div>
+
+All of this can be compiled in <a href="http://www.nasm.us/">NASM</a> using command: <br><span style="font-family: Courier New">nasm -f bin filename.asm -o filename.com</span>
+
+<br>
+And you can run it in <a href="http://www.dosbox.com/">DOSbox</a> by calling commands:<br>
+<span style="font-family: Courier New">mount a ~/Path/To/Directory</span><br>
+<span style="font-family: Courier New">a:</span><br>
+<span style="font-family: Courier New">filename.com</span><br>
+
+
+Hope this helped!
+
+<br> Full code <a href="http://pastebin.com/t9KsWbdX">here</a>.
+
+                  </p>
+                </div>
+            </div>
+        </div>
+    </article>
+
+    <hr>
+
+    <!-- Footer -->
+    <footer>
+        <div class="container">
+            <div class="row">
+                <div class="col-lg-8 col-lg-offset-2 col-md-10 col-md-offset-1">
+                    <ul class="list-inline text-center">
+                        <li>
+                            <a href="http://twitter.com/imjaken">
+                                <span class="fa-stack fa-lg">
+                                    <i class="fa fa-circle fa-stack-2x"></i>
+                                    <i class="fa fa-twitter fa-stack-1x fa-inverse"></i>
+                                </span>
+                            </a>
+                        </li>
+                        <li>
+                            <a href="http://github.com/jakenherman">
+                                <span class="fa-stack fa-lg">
+                                    <i class="fa fa-circle fa-stack-2x"></i>
+                                    <i class="fa fa-github fa-stack-1x fa-inverse"></i>
+                                </span>
+                            </a>
+                        </li>
+                    </ul>
+                    <p class="copyright text-muted">Copyright &copy; jaken.me 2015</p>
+                </div>
+            </div>
+        </div>
+    </footer>
+
+    <!-- jQuery -->
+    <script src="js/jquery.js"></script>
+
+    <!-- Bootstrap Core JavaScript -->
+    <script src="js/bootstrap.min.js"></script>
+
+    <!-- Custom Theme JavaScript -->
+    <script src="js/clean-blog.min.js"></script>
+
+</body>
+
+</html>
